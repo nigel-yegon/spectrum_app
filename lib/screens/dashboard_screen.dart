@@ -11,6 +11,7 @@ import 'tenants_screen.dart';
 import 'payments_screen.dart';
 import 'settings_screen.dart';
 import 'property_detail_screen.dart';
+import 'profile_screen.dart';
 
 // ─── Theme Colors (Based on the reference design) ─────────────────────────
 const Color _bgCream = Color(0xFFF9F9F6);
@@ -133,6 +134,18 @@ class _HomeTabState extends State<_HomeTab> {
                           _CircleButton(
                             icon: Icons.search,
                             onTap: () {}, // Future: Global Search
+                          ),
+                          const SizedBox(width: 8),
+                          _CircleButton(
+                            icon: Icons.account_circle_outlined,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const ProfileScreen(),
+                                ),
+                              );
+                            },
                           ),
                           const SizedBox(width: 8),
                           _CircleButton(
