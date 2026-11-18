@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../providers/app_state.dart';
 import '../models/unit.dart';
+import '../models/payment.dart';
 import 'properties_screen.dart';
 import 'tenants_screen.dart';
 import 'payments_screen.dart';
@@ -51,7 +52,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             label: 'Home',
           ),
           NavigationDestination(
-            icon: Icon(Icons.domain_outlined), // Better property icon
+            icon: Icon(Icons.domain_outlined),
             selectedIcon: Icon(Icons.domain_rounded),
             label: 'Properties',
           ),
@@ -61,7 +62,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             label: 'Tenants',
           ),
           NavigationDestination(
-            icon: Icon(Icons.account_balance_wallet_outlined), // Better payment icon
+            icon: Icon(Icons.account_balance_wallet_outlined),
             selectedIcon: Icon(Icons.account_balance_wallet_rounded),
             label: 'Payments',
           ),
@@ -71,8 +72,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 }
 
-class _HomeTab extends StatelessWidget {
+// ─── Converted to StatefulWidget ──────────────────────────────────────────
+class _HomeTab extends StatefulWidget {
   const _HomeTab();
+
+  @override
+  State<_HomeTab> createState() => _HomeTabState();
+}
+
+class _HomeTabState extends State<_HomeTab> {
+  bool _showRecentPayments = true;
 
   @override
   Widget build(BuildContext context) {
@@ -233,30 +242,29 @@ class _HomeTab extends StatelessWidget {
                   const SizedBox(height: 24),
 
                   // ─── Quick Actions ────────────────────────────────────
-                  // ─── Quick Actions ────────────────────────────────────
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       _QuickAction(
-                        icon: Icons.add_rounded, // matches "+" in image
+                        icon: Icons.add_rounded,
                         label: 'Add Unit',
                         onTap: () => Navigator.push(context,
                             MaterialPageRoute(builder: (_) => const PropertiesScreen())),
                       ),
                       _QuickAction(
-                        icon: Icons.send_rounded, // matches "Send" paper plane
+                        icon: Icons.send_rounded,
                         label: 'Send STK',
                         onTap: () => Navigator.push(context,
                             MaterialPageRoute(builder: (_) => const PaymentsScreen())),
                       ),
                       _QuickAction(
-                        icon: Icons.person_add_alt_1_rounded, // matches "Convert"
+                        icon: Icons.person_add_alt_1_rounded,
                         label: 'New Tenant',
                         onTap: () => Navigator.push(context,
                             MaterialPageRoute(builder: (_) => const TenantsScreen())),
                       ),
                       _QuickAction(
-                        icon: Icons.more_horiz_rounded, // matches "More" dots
+                        icon: Icons.more_horiz_rounded,
                         label: 'More',
                         onTap: () => Navigator.push(context,
                             MaterialPageRoute(builder: (_) => const SettingsScreen())),
@@ -269,7 +277,7 @@ class _HomeTab extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE8F0EA), // Light green tint
+                      color: const Color(0xFFE8F0EA),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Row(
@@ -281,7 +289,7 @@ class _HomeTab extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Welcome to Spectrum',
+                                'Welcome to Spectrum Ventures',
                                 style: GoogleFonts.inter(
                                   fontWeight: FontWeight.w600,
                                   color: _primaryGreen,
@@ -411,6 +419,128 @@ class _HomeTab extends StatelessWidget {
                         ),
                       );
                     }),
+
+                  const SizedBox(height: 16),
+
+                  // ─── Recent Payments (Expandable) ─────────────────────
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Recent Payments',
+                        style: GoogleFonts.inter(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: _textDark,
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          _showRecentPayments
+                              ? Icons.keyboard_arrow_up_rounded
+                              : Icons.keyboard_arrow_down_rounded,
+                          color: _textGrey,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _showRecentPayments = !_showRecentPayments;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  if (_showRecentPayments) ...[
+                    const SizedBox(height: 8),
+                    if (state.payments.isEmpty)
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.grey.shade200),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'No recent payments',
+                            style: GoogleFonts.inter(color: _textGrey, fontSize: 13),
+                          ),
+                        ),
+                      )
+                    else
+                      ...state.payments.take(5).map((p) {
+                        final tenant = state.getTenant(p.tenantId);
+                        final unit = state.units.firstWhere(
+                              (u) => u.id == p.unitId,
+                          orElse: () => state.units.first,
+                        );
+                        final isPaid = p.status == PaymentStatus.confirmed;
+
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.grey.shade200),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: isPaid
+                                      ? const Color(0xFFE8F0EA)
+                                      : Colors.orange.shade50,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Icon(
+                                  isPaid
+                                      ? Icons.check_rounded
+                                      : Icons.hourglass_bottom_rounded,
+                                  color: isPaid
+                                      ? const Color(0xFF2E7D5E)
+                                      : Colors.orange,
+                                  size: 20,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      tenant?.fullName ?? 'Unknown Tenant',
+                                      style: GoogleFonts.inter(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 13,
+                                        color: _textDark,
+                                      ),
+                                    ),
+                                    Text(
+                                      'Unit ${unit.unitNumber} • ${DateFormat('MMM d').format(p.paymentDate)}',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 11,
+                                        color: _textGrey,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Text(
+                                currency.format(p.amount),
+                                style: GoogleFonts.inter(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 13,
+                                  color: _textDark,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
+                  ],
+
                   const SizedBox(height: 40),
                 ],
               ),
