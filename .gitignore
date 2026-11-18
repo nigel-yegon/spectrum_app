@@ -1,0 +1,43 @@
+# Flutter/Dart
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+**/doc/api/
+**/ios/Flutter/.last_build_id
+**/android/.gradle
+**/android/local.properties
+**/android/app/debug
+**/android/app/profile
+**/android/app/release
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/App.framework
+**/ios/Flutter/ephemeral/
+**/linux/flutter/ephemeral/
+**/macos/Flutter/ephemeral/
+**/windows/flutter/ephemeral/
+**/web/sqlite3.wasm
+**/web/sqflite_sw.js
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Secrets — DO NOT COMMIT
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
