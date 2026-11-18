@@ -1,6 +1,7 @@
 // lib/services/database_service.dart
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+
 import '../models/property.dart';
 import '../models/unit.dart';
 import '../models/tenant.dart';
@@ -97,16 +98,24 @@ class DatabaseService {
 
   Future<void> _onUpgrade(Database db, int oldV, int newV) async {
     if (oldV < 2) {
-      await db.execute('ALTER TABLE payments ADD COLUMN checkoutRequestId TEXT');
-      await db.execute('ALTER TABLE payments ADD COLUMN merchantRequestId TEXT');
+      await db.execute(
+        'ALTER TABLE payments ADD COLUMN checkoutRequestId TEXT',
+      );
+      await db.execute(
+        'ALTER TABLE payments ADD COLUMN merchantRequestId TEXT',
+      );
       await db.execute('ALTER TABLE payments ADD COLUMN resultCode INTEGER');
       await db.execute('ALTER TABLE payments ADD COLUMN failureReason TEXT');
       await db.execute('ALTER TABLE payments ADD COLUMN mpesaReceipt TEXT');
       await db.execute('ALTER TABLE payments ADD COLUMN paidAt TEXT');
     }
     if (oldV < 3) {
-      await db.execute('ALTER TABLE payments ADD COLUMN serverInvoiceId INTEGER');
-      await db.execute('ALTER TABLE payments ADD COLUMN serverInvoiceNumber TEXT');
+      await db.execute(
+        'ALTER TABLE payments ADD COLUMN serverInvoiceId INTEGER',
+      );
+      await db.execute(
+        'ALTER TABLE payments ADD COLUMN serverInvoiceNumber TEXT',
+      );
     }
   }
 
@@ -124,8 +133,12 @@ class DatabaseService {
 
   Future<void> updateProperty(Property property) async {
     final db = await database;
-    await db.update('properties', property.toMap(),
-        where: 'id = ?', whereArgs: [property.id]);
+    await db.update(
+      'properties',
+      property.toMap(),
+      where: 'id = ?',
+      whereArgs: [property.id],
+    );
   }
 
   Future<void> deleteProperty(String id) async {
@@ -141,10 +154,12 @@ class DatabaseService {
 
   Future<List<Unit>> getUnitsByProperty(String propertyId) async {
     final db = await database;
-    final maps = await db.query('units',
-        where: 'propertyId = ?',
-        whereArgs: [propertyId],
-        orderBy: 'unitNumber ASC');
+    final maps = await db.query(
+      'units',
+      where: 'propertyId = ?',
+      whereArgs: [propertyId],
+      orderBy: 'unitNumber ASC',
+    );
     return maps.map((m) => Unit.fromMap(m)).toList();
   }
 
@@ -156,8 +171,12 @@ class DatabaseService {
 
   Future<void> updateUnit(Unit unit) async {
     final db = await database;
-    await db.update('units', unit.toMap(),
-        where: 'id = ?', whereArgs: [unit.id]);
+    await db.update(
+      'units',
+      unit.toMap(),
+      where: 'id = ?',
+      whereArgs: [unit.id],
+    );
   }
 
   Future<void> deleteUnit(String id) async {
@@ -179,16 +198,24 @@ class DatabaseService {
 
   Future<Tenant?> getTenantById(String id) async {
     final db = await database;
-    final maps = await db.query('tenants',
-        where: 'id = ?', whereArgs: [id], limit: 1);
+    final maps = await db.query(
+      'tenants',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
     if (maps.isEmpty) return null;
     return Tenant.fromMap(maps.first);
   }
 
   Future<void> updateTenant(Tenant tenant) async {
     final db = await database;
-    await db.update('tenants', tenant.toMap(),
-        where: 'id = ?', whereArgs: [tenant.id]);
+    await db.update(
+      'tenants',
+      tenant.toMap(),
+      where: 'id = ?',
+      whereArgs: [tenant.id],
+    );
   }
 
   // Payment CRUD
@@ -199,10 +226,12 @@ class DatabaseService {
 
   Future<List<Payment>> getPaymentsByUnit(String unitId) async {
     final db = await database;
-    final maps = await db.query('payments',
-        where: 'unitId = ?',
-        whereArgs: [unitId],
-        orderBy: 'paymentDate DESC');
+    final maps = await db.query(
+      'payments',
+      where: 'unitId = ?',
+      whereArgs: [unitId],
+      orderBy: 'paymentDate DESC',
+    );
     return maps.map((m) => Payment.fromMap(m)).toList();
   }
 
@@ -214,24 +243,34 @@ class DatabaseService {
 
   Future<List<Payment>> getPaymentsByTenant(String tenantId) async {
     final db = await database;
-    final maps = await db.query('payments',
-        where: 'tenantId = ?',
-        whereArgs: [tenantId],
-        orderBy: 'paymentDate DESC');
+    final maps = await db.query(
+      'payments',
+      where: 'tenantId = ?',
+      whereArgs: [tenantId],
+      orderBy: 'paymentDate DESC',
+    );
     return maps.map((m) => Payment.fromMap(m)).toList();
   }
 
   Future<Payment?> findPaymentByCheckoutId(String checkoutId) async {
     final db = await database;
-    final maps = await db.query('payments',
-        where: 'checkoutRequestId = ?', whereArgs: [checkoutId], limit: 1);
+    final maps = await db.query(
+      'payments',
+      where: 'checkoutRequestId = ?',
+      whereArgs: [checkoutId],
+      limit: 1,
+    );
     return maps.isEmpty ? null : Payment.fromMap(maps.first);
   }
 
   Future<void> updatePayment(Payment payment) async {
     final db = await database;
-    await db.update('payments', payment.toMap(),
-        where: 'id = ?', whereArgs: [payment.id]);
+    await db.update(
+      'payments',
+      payment.toMap(),
+      where: 'id = ?',
+      whereArgs: [payment.id],
+    );
   }
 
   // Full backup

@@ -45,7 +45,7 @@ class Unit {
       monthlyRent: (map['monthlyRent'] as num).toDouble(),
       paymentDueDay: map['paymentDueDay'],
       status: UnitStatus.values.firstWhere(
-            (e) => e.name == map['status'],
+        (e) => e.name == map['status'],
         orElse: () => UnitStatus.vacant,
       ),
       tenantId: map['tenantId'],

@@ -1,4 +1,5 @@
 import 'dart:io' show Platform;
+
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -29,7 +30,7 @@ class SpectrumApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => AppState()..loadAll(),
+      create: (_) => AppState(),
       child: MaterialApp(
         title: 'Spectrum',
         debugShowCheckedModeBanner: false,
@@ -87,7 +88,10 @@ class SpectrumApp extends StatelessWidget {
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
             return GoogleFonts.inter(
-                fontSize: 12, fontWeight: FontWeight.w600, color: primaryGreen);
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: primaryGreen,
+            );
           }
           return GoogleFonts.inter(fontSize: 12, color: Colors.grey);
         }),

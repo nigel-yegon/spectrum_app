@@ -1,6 +1,7 @@
 // lib/widgets/add_property_sheet.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../providers/app_state.dart';
 
 class AddPropertySheet extends StatefulWidget {
@@ -39,8 +40,10 @@ class _AddPropertySheetState extends State<AddPropertySheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('Add Property',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+            const Text(
+              'Add Property',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            ),
             const SizedBox(height: 16),
             TextFormField(
               controller: _nameCtrl,

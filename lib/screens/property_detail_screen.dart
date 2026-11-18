@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+
 import '../providers/app_state.dart';
 import '../models/property.dart';
 import '../models/unit.dart';
@@ -32,11 +33,13 @@ class PropertyDetailScreen extends StatelessWidget {
                   content: const Text('This will remove all units too.'),
                   actions: [
                     TextButton(
-                        onPressed: () => Navigator.pop(context, false),
-                        child: const Text('Cancel')),
+                      onPressed: () => Navigator.pop(context, false),
+                      child: const Text('Cancel'),
+                    ),
                     FilledButton(
-                        onPressed: () => Navigator.pop(context, true),
-                        child: const Text('Delete')),
+                      onPressed: () => Navigator.pop(context, true),
+                      child: const Text('Delete'),
+                    ),
                   ],
                 ),
               );
@@ -67,15 +70,19 @@ class PropertyDetailScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(children: [
-                    const Icon(Icons.location_on_outlined, size: 18),
-                    const SizedBox(width: 6),
-                    Expanded(child: Text(property.address)),
-                  ]),
+                  Row(
+                    children: [
+                      const Icon(Icons.location_on_outlined, size: 18),
+                      const SizedBox(width: 6),
+                      Expanded(child: Text(property.address)),
+                    ],
+                  ),
                   if (property.description != null) ...[
                     const SizedBox(height: 8),
-                    Text(property.description!,
-                        style: TextStyle(color: Colors.grey.shade600)),
+                    Text(
+                      property.description!,
+                      style: TextStyle(color: Colors.grey.shade600),
+                    ),
                   ],
                   const SizedBox(height: 12),
                   Wrap(
@@ -84,7 +91,8 @@ class PropertyDetailScreen extends StatelessWidget {
                       Chip(label: Text('${units.length} Units')),
                       Chip(
                         label: Text(
-                            '${units.where((u) => u.status == UnitStatus.occupied).length} Occupied'),
+                          '${units.where((u) => u.status == UnitStatus.occupied).length} Occupied',
+                        ),
                       ),
                     ],
                   ),
@@ -93,15 +101,19 @@ class PropertyDetailScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          const Text('Units',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+          const Text(
+            'Units',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          ),
           const SizedBox(height: 8),
           if (units.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 24),
               child: Center(
-                child: Text('No units yet',
-                    style: TextStyle(color: Colors.grey.shade600)),
+                child: Text(
+                  'No units yet',
+                  style: TextStyle(color: Colors.grey.shade600),
+                ),
               ),
             )
           else
@@ -112,32 +124,40 @@ class PropertyDetailScreen extends StatelessWidget {
                 child: ListTile(
                   contentPadding: const EdgeInsets.all(16),
                   leading: CircleAvatar(
-                    backgroundColor:
-                    _statusColor(u.status).withValues(alpha: 0.1),
-                    child: Icon(Icons.meeting_room,
-                        color: _statusColor(u.status)),
+                    backgroundColor: _statusColor(u.status)
+                        .withValues(alpha: 0.1),
+                    child: Icon(
+                      Icons.meeting_room,
+                      color: _statusColor(u.status),
+                    ),
                   ),
-                  title: Text('Unit ${u.unitNumber}',
-                      style: const TextStyle(fontWeight: FontWeight.w600)),
+                  title: Text(
+                    'Unit ${u.unitNumber}',
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 4),
                       Text(
-                          'Rent: ${currency.format(u.monthlyRent)} • Due: ${u.paymentDueDay}${_suffix(u.paymentDueDay)}'),
+                        'Rent: ${currency.format(u.monthlyRent)} • Due: ${u.paymentDueDay}${_suffix(u.paymentDueDay)}',
+                      ),
                       if (tenant != null)
                         Text('Tenant: ${tenant.fullName}')
                       else
-                        Text('Vacant',
-                            style: TextStyle(color: Colors.grey.shade600)),
+                        Text(
+                          'Vacant',
+                          style: TextStyle(color: Colors.grey.shade600),
+                        ),
                     ],
                   ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) =>
-                              UnitDetailScreen(unitId: u.id))),
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => UnitDetailScreen(unitId: u.id),
+                    ),
+                  ),
                 ),
               );
             }),

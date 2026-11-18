@@ -1,24 +1,31 @@
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../providers/app_state.dart';
+import '../services/auth_service.dart';
 import '../models/unit.dart';
 import '../models/payment.dart';
+
 import 'properties_screen.dart';
 import 'tenants_screen.dart';
 import 'payments_screen.dart';
 import 'settings_screen.dart';
 import 'property_detail_screen.dart';
 import 'profile_screen.dart';
+import 'insights_screen.dart';
 
-// ─── Theme Colors (Based on the reference design) ─────────────────────────
+// ─── Theme Colors ────────────────────────────────────────────────────────
+
 const Color _bgCream = Color(0xFFF9F9F6);
 const Color _primaryGreen = Color(0xFF1E3A2F);
 const Color _accentGreen = Color(0xFF2E7D5E);
 const Color _textDark = Color(0xFF1A1A1A);
 const Color _textGrey = Color(0xFF7A7A7A);
+
+// ─── Dashboard Screen ────────────────────────────────────────────────────
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -41,11 +48,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
           PropertiesScreen(),
           TenantsScreen(),
           PaymentsScreen(),
+          InsightsScreen(),
         ],
       ),
       bottomNavigationBar: NavigationBar(
+        backgroundColor: Colors.white,
         selectedIndex: _index,
-        onDestinationSelected: (i) => setState(() => _index = i),
+        onDestinationSelected: (i) {
+          setState(() => _index = i);
+        },
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.home_outlined),
@@ -67,13 +78,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
             selectedIcon: Icon(Icons.account_balance_wallet_rounded),
             label: 'Payments',
           ),
+          NavigationDestination(
+            icon: Icon(Icons.insights_outlined),
+            selectedIcon: Icon(Icons.insights_rounded),
+            label: 'Insights',
+          ),
         ],
       ),
     );
   }
 }
 
-// ─── Converted to StatefulWidget ──────────────────────────────────────────
+// ─── Home Tab ────────────────────────────────────────────────────────────
+
 class _HomeTab extends StatefulWidget {
   const _HomeTab();
 
@@ -82,13 +99,82 @@ class _HomeTab extends StatefulWidget {
 }
 
 class _HomeTabState extends State<_HomeTab> {
+  final AuthService _auth = AuthService();
+
   bool _showRecentPayments = true;
+  bool _showProperties = true;
   bool _showCurrencyAmounts = true;
+
+  bool _profileLoading = true;
+  String _profileName = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  // Retrieve the saved profile name from AuthService.
+  Future<void> _loadProfile() async {
+    try {
+      final profile = await _auth.getProfile();
+
+      if (!mounted) return;
+
+      setState(() {
+        _profileName = (profile['fullName'] ?? '').toString().trim();
+        _profileLoading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+
+      setState(() {
+        _profileName = '';
+        _profileLoading = false;
+      });
+    }
+  }
+
+  // Navigate to profile and reload the saved name on return.
+  Future<void> _openProfile() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const ProfileScreen(),
+      ),
+    );
+
+    if (!mounted) return;
+
+    await _loadProfile();
+  }
+
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  }
+
+  String _formatCurrency(
+      num amount,
+      NumberFormat formatter,
+      ) {
+    return _showCurrencyAmounts
+        ? formatter.format(amount)
+        : '••••••';
+  }
 
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
-    final currency = NumberFormat.currency(symbol: 'KSh ', decimalDigits: 0);
+
+    final currency = NumberFormat.currency(
+      symbol: 'KSh ',
+      decimalDigits: 0,
+    );
+
     final greeting = _getGreeting();
 
     return Scaffold(
@@ -96,76 +182,105 @@ class _HomeTabState extends State<_HomeTab> {
       body: SafeArea(
         child: RefreshIndicator(
           color: _primaryGreen,
-          onRefresh: state.loadAll,
+          onRefresh: () async {
+            await Future.wait([
+              state.loadAll(),
+              _loadProfile(),
+            ]);
+          },
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 16,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ─── Top Bar ──────────────────────────────────────────
+                  // ─── BRAND HEADER ─────────────────────────────────
+
+                  Text(
+                    'Spectrum Manager',
+                    style: GoogleFonts.inter(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: _primaryGreen,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  // ─── GREETING AND PROFILE ─────────────────────────
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            greeting,
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              color: _textGrey,
-                              fontWeight: FontWeight.w500,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _profileName.isNotEmpty
+                                  ? '$greeting, $_profileName'
+                                  : greeting,
+                              style: GoogleFonts.inter(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: _textDark,
+                              ),
                             ),
-                          ),
-                          Text(
-                            'Spectrum Manager',
-                            style: GoogleFonts.inter(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: _textDark,
+                            const SizedBox(height: 4),
+                            Text(
+                              'Here is your property overview.',
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                color: _textGrey,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                      Row(
-                        children: [
-                          _CircleButton(
-                            icon: Icons.search,
-                            onTap: () {}, // Future: Global Search
-                          ),
-                          const SizedBox(width: 8),
-                          _CircleButton(
-                            icon: Icons.account_circle_outlined,
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const ProfileScreen(),
-                                ),
-                              );
-                            },
-                          ),
-                          const SizedBox(width: 8),
-                          _CircleButton(
-                            icon: Icons.settings_outlined,
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const SettingsScreen(),
-                                ),
-                              );
-                            },
-                          ),
-                        ],
+
+                      const SizedBox(width: 12),
+
+                      _CircleButton(
+                        icon: Icons.search,
+                        onTap: () {
+                          // Reserved for global search.
+                        },
+                      ),
+
+                      const SizedBox(width: 8),
+
+                      _CircleButton(
+                        icon: Icons.settings_outlined,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const SettingsScreen(),
+                            ),
+                          );
+                        },
+                      ),
+
+                      const SizedBox(width: 8),
+
+                      _CircleButton(
+                        icon: Icons.person_outline_rounded,
+                        onTap: _openProfile,
+                        backgroundColor: const Color(0xFFE8F0EA),
+                        iconColor: _primaryGreen,
                       ),
                     ],
                   ),
+
                   const SizedBox(height: 24),
 
-                  // ─── Main Balance Card (Dark Green) ───────────────────
+                  // ─── EXPECTED RENT CARD ───────────────────────────
+
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(24),
@@ -184,7 +299,8 @@ class _HomeTabState extends State<_HomeTab> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment:
+                          MainAxisAlignment.spaceBetween,
                           children: [
                             Row(
                               children: [
@@ -221,13 +337,21 @@ class _HomeTabState extends State<_HomeTab> {
                                 ),
                               ],
                             ),
-                            const Icon(Icons.bar_chart_rounded,
-                                color: Colors.white, size: 24),
+                            const Icon(
+                              Icons.bar_chart_rounded,
+                              color: Colors.white,
+                              size: 24,
+                            ),
                           ],
                         ),
+
                         const SizedBox(height: 12),
+
                         Text(
-                          _formatCurrency(state.totalMonthlyExpectedRent, currency),
+                          _formatCurrency(
+                            state.totalMonthlyExpectedRent,
+                            currency,
+                          ),
                           style: GoogleFonts.inter(
                             color: Colors.white,
                             fontSize: 32,
@@ -235,23 +359,33 @@ class _HomeTabState extends State<_HomeTab> {
                             letterSpacing: -0.5,
                           ),
                         ),
+
                         const SizedBox(height: 16),
+
                         Row(
                           children: [
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 4),
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.white.withOpacity(0.15),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(Icons.arrow_upward,
-                                      color: Color(0xFFA9D9B6), size: 14),
+                                  const Icon(
+                                    Icons.arrow_upward,
+                                    color: Color(0xFFA9D9B6),
+                                    size: 14,
+                                  ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    _formatCurrency(state.totalCollectedThisMonth, currency),
+                                    _formatCurrency(
+                                      state.totalCollectedThisMonth,
+                                      currency,
+                                    ),
                                     style: GoogleFonts.inter(
                                       color: const Color(0xFFA9D9B6),
                                       fontSize: 12,
@@ -274,41 +408,69 @@ class _HomeTabState extends State<_HomeTab> {
                       ],
                     ),
                   ),
+
                   const SizedBox(height: 24),
 
-                  // ─── Quick Actions ────────────────────────────────────
+                  // ─── QUICK ACTIONS ────────────────────────────────
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       _QuickAction(
                         icon: Icons.add_rounded,
                         label: 'Add Unit',
-                        onTap: () => Navigator.push(context,
-                            MaterialPageRoute(builder: (_) => const PropertiesScreen())),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const PropertiesScreen(),
+                            ),
+                          );
+                        },
                       ),
                       _QuickAction(
                         icon: Icons.send_rounded,
                         label: 'Send STK',
-                        onTap: () => Navigator.push(context,
-                            MaterialPageRoute(builder: (_) => const PaymentsScreen())),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const PaymentsScreen(),
+                            ),
+                          );
+                        },
                       ),
                       _QuickAction(
                         icon: Icons.person_add_alt_1_rounded,
                         label: 'New Tenant',
-                        onTap: () => Navigator.push(context,
-                            MaterialPageRoute(builder: (_) => const TenantsScreen())),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const TenantsScreen(),
+                            ),
+                          );
+                        },
                       ),
                       _QuickAction(
                         icon: Icons.more_horiz_rounded,
                         label: 'More',
-                        onTap: () => Navigator.push(context,
-                            MaterialPageRoute(builder: (_) => const SettingsScreen())),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const SettingsScreen(),
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
+
                   const SizedBox(height: 32),
 
-                  // ─── Contextual Info Banner ───────────────────────────
+                  // ─── CONTEXTUAL BANNER ────────────────────────────
+
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -317,7 +479,11 @@ class _HomeTabState extends State<_HomeTab> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.eco, color: _accentGreen, size: 28),
+                        const Icon(
+                          Icons.eco,
+                          color: _accentGreen,
+                          size: 28,
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
@@ -345,9 +511,11 @@ class _HomeTabState extends State<_HomeTab> {
                       ],
                     ),
                   ),
+
                   const SizedBox(height: 32),
 
-                  // ─── Properties Overview ──────────────────────────────
+                  // ─── YOUR PROPERTIES (COLLAPSIBLE) ─────────────────
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -359,105 +527,153 @@ class _HomeTabState extends State<_HomeTab> {
                           color: _textDark,
                         ),
                       ),
-                      TextButton(
-                        onPressed: () => Navigator.push(context,
-                            MaterialPageRoute(builder: (_) => const PropertiesScreen())),
-                        child: Text(
-                          'See all',
-                          style: GoogleFonts.inter(
-                            color: _accentGreen,
-                            fontWeight: FontWeight.w600,
+                      Row(
+                        children: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const PropertiesScreen(),
+                                ),
+                              );
+                            },
+                            child: Text(
+                              'See all',
+                              style: GoogleFonts.inter(
+                                color: _accentGreen,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
-                        ),
+                          IconButton(
+                            tooltip: _showProperties
+                                ? 'Hide properties'
+                                : 'Show properties',
+                            icon: Icon(
+                              _showProperties
+                                  ? Icons.keyboard_arrow_up_rounded
+                                  : Icons.keyboard_arrow_down_rounded,
+                              color: _textGrey,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _showProperties = !_showProperties;
+                              });
+                            },
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
 
-                  if (state.properties.isEmpty)
-                    _EmptyHint(
-                      message: 'No properties yet. Add your first property to begin.',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const PropertiesScreen(),
+                  if (_showProperties) ...[
+                    const SizedBox(height: 8),
+
+                    if (state.properties.isEmpty)
+                      _EmptyHint(
+                        message:
+                        'No properties yet. Add your first property to begin.',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const PropertiesScreen(),
+                            ),
+                          );
+                        },
+                      )
+                    else
+                      ...state.properties.map((property) {
+                        final units =
+                        state.unitsForProperty(property.id);
+
+                        final occupied = units
+                            .where(
+                              (u) => u.status == UnitStatus.occupied,
+                        )
+                            .length;
+
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: Colors.grey.shade200,
+                            ),
+                          ),
+                          child: ListTile(
+                            contentPadding:
+                            const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            leading: Container(
+                              width: 48,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                color: _bgCream,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(
+                                Icons.apartment,
+                                color: _primaryGreen,
+                              ),
+                            ),
+                            title: Text(
+                              property.name,
+                              style: GoogleFonts.inter(
+                                fontWeight: FontWeight.w600,
+                                color: _textDark,
+                              ),
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment:
+                              CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 4),
+                                Text(
+                                  property.address,
+                                  style: GoogleFonts.inter(
+                                    color: _textGrey,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  '$occupied of ${units.length} units occupied',
+                                  style: GoogleFonts.inter(
+                                    color: _accentGreen,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            trailing: const Icon(
+                              Icons.chevron_right,
+                              color: _textGrey,
+                            ),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => PropertyDetailScreen(
+                                    property: property,
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                         );
-                      },
-                    )
-                  else
-                    ...state.properties.map((p) {
-                      final units = state.unitsForProperty(p.id);
-                      final occupied =
-                          units.where((u) => u.status == UnitStatus.occupied).length;
-
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.grey.shade200),
-                        ),
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 8),
-                          leading: Container(
-                            width: 48,
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: _bgCream,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Icon(Icons.apartment, color: _primaryGreen),
-                          ),
-                          title: Text(
-                            p.name,
-                            style: GoogleFonts.inter(
-                              fontWeight: FontWeight.w600,
-                              color: _textDark,
-                            ),
-                          ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(height: 4),
-                              Text(
-                                p.address,
-                                style: GoogleFonts.inter(
-                                  color: _textGrey,
-                                  fontSize: 12,
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                '$occupied of ${units.length} units occupied',
-                                style: GoogleFonts.inter(
-                                  color: _accentGreen,
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                          trailing: const Icon(Icons.chevron_right, color: _textGrey),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => PropertyDetailScreen(
-                                  property: p,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      );
-                    }),
+                      }),
+                  ],
 
                   const SizedBox(height: 16),
 
-                  // ─── Recent Payments (Expandable) ─────────────────────
+                  // ─── RECENT PAYMENTS (COLLAPSIBLE) ────────────────
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -470,6 +686,9 @@ class _HomeTabState extends State<_HomeTab> {
                         ),
                       ),
                       IconButton(
+                        tooltip: _showRecentPayments
+                            ? 'Hide recent payments'
+                            : 'Show recent payments',
                         icon: Icon(
                           _showRecentPayments
                               ? Icons.keyboard_arrow_up_rounded
@@ -478,37 +697,53 @@ class _HomeTabState extends State<_HomeTab> {
                         ),
                         onPressed: () {
                           setState(() {
-                            _showRecentPayments = !_showRecentPayments;
+                            _showRecentPayments =
+                            !_showRecentPayments;
                           });
                         },
                       ),
                     ],
                   ),
+
                   if (_showRecentPayments) ...[
                     const SizedBox(height: 8),
+
                     if (state.payments.isEmpty)
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.grey.shade200),
+                          border: Border.all(
+                            color: Colors.grey.shade200,
+                          ),
                         ),
                         child: Center(
                           child: Text(
                             'No recent payments',
-                            style: GoogleFonts.inter(color: _textGrey, fontSize: 13),
+                            style: GoogleFonts.inter(
+                              color: _textGrey,
+                              fontSize: 13,
+                            ),
                           ),
                         ),
                       )
                     else
-                      ...state.payments.take(5).map((p) {
-                        final tenant = state.getTenant(p.tenantId);
-                        final unit = state.units.firstWhere(
-                              (u) => u.id == p.unitId,
-                          orElse: () => state.units.first,
+                      ...state.payments.take(5).map((payment) {
+                        final tenant =
+                        state.getTenant(payment.tenantId);
+
+                        // Safe lookup: payment may reference a missing unit.
+                        final matchingUnits = state.units.where(
+                              (unit) => unit.id == payment.unitId,
                         );
-                        final isPaid = p.status == PaymentStatus.confirmed;
+
+                        final unit = matchingUnits.isEmpty
+                            ? null
+                            : matchingUnits.first;
+
+                        final isPaid =
+                            payment.status == PaymentStatus.confirmed;
 
                         return Container(
                           margin: const EdgeInsets.only(bottom: 8),
@@ -516,7 +751,9 @@ class _HomeTabState extends State<_HomeTab> {
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey.shade200),
+                            border: Border.all(
+                              color: Colors.grey.shade200,
+                            ),
                           ),
                           child: Row(
                             children: [
@@ -534,18 +771,22 @@ class _HomeTabState extends State<_HomeTab> {
                                       ? Icons.check_rounded
                                       : Icons.hourglass_bottom_rounded,
                                   color: isPaid
-                                      ? const Color(0xFF2E7D5E)
+                                      ? _accentGreen
                                       : Colors.orange,
                                   size: 20,
                                 ),
                               ),
+
                               const SizedBox(width: 12),
+
                               Expanded(
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  crossAxisAlignment:
+                                  CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      tenant?.fullName ?? 'Unknown Tenant',
+                                      tenant?.fullName ??
+                                          'Unknown Tenant',
                                       style: GoogleFonts.inter(
                                         fontWeight: FontWeight.w600,
                                         fontSize: 13,
@@ -553,7 +794,7 @@ class _HomeTabState extends State<_HomeTab> {
                                       ),
                                     ),
                                     Text(
-                                      'Unit ${unit.unitNumber} • ${DateFormat('MMM d').format(p.paymentDate)}',
+                                      '${unit == null ? 'Unknown unit' : 'Unit ${unit.unitNumber}'} • ${DateFormat('MMM d').format(payment.paymentDate)}',
                                       style: GoogleFonts.inter(
                                         fontSize: 11,
                                         color: _textGrey,
@@ -562,8 +803,12 @@ class _HomeTabState extends State<_HomeTab> {
                                   ],
                                 ),
                               ),
+
                               Text(
-                                _formatCurrency(p.amount, currency),
+                                _formatCurrency(
+                                  payment.amount,
+                                  currency,
+                                ),
                                 style: GoogleFonts.inter(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 13,
@@ -585,26 +830,22 @@ class _HomeTabState extends State<_HomeTab> {
       ),
     );
   }
-
-  String _formatCurrency(num amount, NumberFormat formatter) {
-    return _showCurrencyAmounts ? formatter.format(amount) : '••••••';
-  }
-
-  String _getGreeting() {
-    final hour = DateTime.now().hour;
-    if (hour < 12) return 'Good morning';
-    if (hour < 17) return 'Good afternoon';
-    return 'Good evening';
-  }
 }
 
-// ─── Helper Widgets ───────────────────────────────────────────────────────
+// ─── Circular Header Button ──────────────────────────────────────────────
 
 class _CircleButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
+  final Color? backgroundColor;
+  final Color? iconColor;
 
-  const _CircleButton({required this.icon, required this.onTap});
+  const _CircleButton({
+    required this.icon,
+    required this.onTap,
+    this.backgroundColor,
+    this.iconColor,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -613,15 +854,23 @@ class _CircleButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: backgroundColor ?? Colors.white,
           shape: BoxShape.circle,
-          border: Border.all(color: Colors.grey.shade200),
+          border: Border.all(
+            color: Colors.grey.shade200,
+          ),
         ),
-        child: Icon(icon, color: _textDark, size: 20),
+        child: Icon(
+          icon,
+          color: iconColor ?? _textDark,
+          size: 20,
+        ),
       ),
     );
   }
 }
+
+// ─── Quick Action ────────────────────────────────────────────────────────
 
 class _QuickAction extends StatelessWidget {
   final IconData icon;
@@ -646,9 +895,15 @@ class _QuickAction extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.grey.shade200),
+              border: Border.all(
+                color: Colors.grey.shade200,
+              ),
             ),
-            child: Icon(icon, color: _primaryGreen, size: 24),
+            child: Icon(
+              icon,
+              color: _primaryGreen,
+              size: 24,
+            ),
           ),
         ),
         const SizedBox(height: 8),
@@ -664,6 +919,8 @@ class _QuickAction extends StatelessWidget {
     );
   }
 }
+
+// ─── Empty State ─────────────────────────────────────────────────────────
 
 class _EmptyHint extends StatelessWidget {
   final String message;
@@ -681,7 +938,9 @@ class _EmptyHint extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(
+          color: Colors.grey.shade200,
+        ),
       ),
       child: Column(
         children: [
@@ -694,7 +953,9 @@ class _EmptyHint extends StatelessWidget {
           Text(
             message,
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(color: _textGrey),
+            style: GoogleFonts.inter(
+              color: _textGrey,
+            ),
           ),
           const SizedBox(height: 16),
           FilledButton(

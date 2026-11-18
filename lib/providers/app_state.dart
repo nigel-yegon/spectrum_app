@@ -1,4 +1,3 @@
-
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -134,9 +133,7 @@ class AppState extends ChangeNotifier {
     required int paymentDueDay,
     String? description,
   }) async {
-    final propertyExists = _properties.any(
-          (p) => p.id == propertyId,
-    );
+    final propertyExists = _properties.any((p) => p.id == propertyId);
 
     if (!propertyExists) {
       throw Exception('Property not found.');
@@ -196,9 +193,7 @@ class AppState extends ChangeNotifier {
   }
 
   List<Unit> unitsForProperty(String propertyId) {
-    return _units
-        .where((u) => u.propertyId == propertyId)
-        .toList();
+    return _units.where((u) => u.propertyId == propertyId).toList();
   }
 
   // ─── Tenants ────────────────────────────────────────────
@@ -250,10 +245,7 @@ class AppState extends ChangeNotifier {
     return null;
   }
 
-  Future<void> assignTenantToUnit(
-      String unitId,
-      String tenantId,
-      ) async {
+  Future<void> assignTenantToUnit(String unitId, String tenantId) async {
     final unitIndex = _units.indexWhere((u) => u.id == unitId);
 
     if (unitIndex == -1) {
@@ -283,10 +275,7 @@ class AppState extends ChangeNotifier {
 
     final unit = _units[unitIndex];
 
-    final updated = unit.copyWith(
-      status: UnitStatus.vacant,
-      clearTenant: true,
-    );
+    final updated = unit.copyWith(status: UnitStatus.vacant, clearTenant: true);
 
     await updateUnit(updated);
   }
@@ -363,8 +352,8 @@ class AppState extends ChangeNotifier {
     if (unit.tenantId == null) return null;
 
     final exists = _payments.any(
-          (p) =>
-      p.unitId == unitId &&
+      (p) =>
+          p.unitId == unitId &&
           p.forMonth.year == forMonth.year &&
           p.forMonth.month == forMonth.month &&
           p.status != PaymentStatus.rejected,
@@ -394,28 +383,20 @@ class AppState extends ChangeNotifier {
     return payment;
   }
 
-  Future<void> generateAllInvoicesForMonth(
-      DateTime forMonth,
-      ) async {
+  Future<void> generateAllInvoicesForMonth(DateTime forMonth) async {
     final occupiedUnits = _units
         .where((u) => u.status == UnitStatus.occupied)
         .toList();
 
     for (final unit in occupiedUnits) {
-      await generateInvoice(
-        unitId: unit.id,
-        forMonth: forMonth,
-      );
+      await generateInvoice(unitId: unit.id, forMonth: forMonth);
     }
   }
 
   // ─── M-Pesa Phone Validation ────────────────────────────
 
   String _normalizeKenyanPhone(String phone) {
-    var normalized = phone.replaceAll(
-      RegExp(r'[\s-]+'),
-      '',
-    );
+    var normalized = phone.replaceAll(RegExp(r'[\s-]+'), '');
 
     if (normalized.startsWith('+')) {
       normalized = normalized.substring(1);
@@ -428,7 +409,7 @@ class AppState extends ChangeNotifier {
     if (!RegExp(r'^254[17]\d{8}$').hasMatch(normalized)) {
       throw Exception(
         'Enter a valid Kenyan mobile number, '
-            'e.g. 0712345678 or 254712345678.',
+        'e.g. 0712345678 or 254712345678.',
       );
     }
 
@@ -441,9 +422,7 @@ class AppState extends ChangeNotifier {
     required String paymentId,
     required String phone,
   }) async {
-    final idx = _payments.indexWhere(
-          (p) => p.id == paymentId,
-    );
+    final idx = _payments.indexWhere((p) => p.id == paymentId);
 
     if (idx == -1) {
       throw Exception('Payment not found.');
@@ -459,15 +438,13 @@ class AppState extends ChangeNotifier {
         payment.checkoutRequestId != null) {
       throw Exception(
         'An M-Pesa request is already pending for this invoice. '
-            'Check its status before trying again.',
+        'Check its status before trying again.',
       );
     }
 
     final normalizedPhone = _normalizeKenyanPhone(phone);
 
-    final unitIndex = _units.indexWhere(
-          (u) => u.id == payment.unitId,
-    );
+    final unitIndex = _units.indexWhere((u) => u.id == payment.unitId);
 
     if (unitIndex == -1) {
       throw Exception('The payment unit could not be found.');
@@ -506,9 +483,7 @@ class AppState extends ChangeNotifier {
 
     if (_disposed) return updated;
 
-    final updatedIndex = _payments.indexWhere(
-          (p) => p.id == paymentId,
-    );
+    final updatedIndex = _payments.indexWhere((p) => p.id == paymentId);
 
     if (updatedIndex >= 0) {
       _payments[updatedIndex] = updated;
@@ -516,10 +491,7 @@ class AppState extends ChangeNotifier {
 
     _notify();
 
-    _startPolling(
-      payment.id,
-      push.checkoutRequestId,
-    );
+    _startPolling(payment.id, push.checkoutRequestId);
 
     return updated;
   }
@@ -532,18 +504,15 @@ class AppState extends ChangeNotifier {
     final pendingPayments = _payments
         .where(
           (p) =>
-      p.status == PaymentStatus.pending &&
-          p.checkoutRequestId != null,
-    )
+              p.status == PaymentStatus.pending && p.checkoutRequestId != null,
+        )
         .toList();
 
     for (final payment in pendingPayments) {
       if (_disposed) return;
 
       try {
-        final result = await _mpesa.pollStatus(
-          payment.checkoutRequestId!,
-        );
+        final result = await _mpesa.pollStatus(payment.checkoutRequestId!);
 
         if (_disposed) return;
 
@@ -555,21 +524,19 @@ class AppState extends ChangeNotifier {
       } catch (e) {
         debugPrint(
           'Payment reconciliation error '
-              '(${payment.id}): $e',
+          '(${payment.id}): $e',
         );
       }
     }
   }
 
   Future<void> _applyReconciledSuccess(
-      Payment payment,
-      RemotePaymentStatus result,
-      ) async {
+    Payment payment,
+    RemotePaymentStatus result,
+  ) async {
     if (_disposed) return;
 
-    final idx = _payments.indexWhere(
-          (p) => p.id == payment.id,
-    );
+    final idx = _payments.indexWhere((p) => p.id == payment.id);
 
     if (idx == -1) return;
 
@@ -594,14 +561,12 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> _applyReconciledFailure(
-      Payment payment,
-      RemotePaymentStatus result,
-      ) async {
+    Payment payment,
+    RemotePaymentStatus result,
+  ) async {
     if (_disposed) return;
 
-    final idx = _payments.indexWhere(
-          (p) => p.id == payment.id,
-    );
+    final idx = _payments.indexWhere((p) => p.id == payment.id);
 
     if (idx == -1) return;
 
@@ -625,95 +590,81 @@ class AppState extends ChangeNotifier {
 
   // ─── Automatic M-Pesa Polling ───────────────────────────
 
-  void _startPolling(
-      String paymentId,
-      String checkoutRequestId,
-      ) {
+  void _startPolling(String paymentId, String checkoutRequestId) {
     _pollers[checkoutRequestId]?.cancel();
 
     final startedAt = DateTime.now();
     const maxWait = Duration(seconds: 120);
 
-    _pollers[checkoutRequestId] = Timer.periodic(
-      const Duration(seconds: 3),
-          (timer) async {
-        if (_disposed) {
+    _pollers[checkoutRequestId] = Timer.periodic(const Duration(seconds: 3), (
+      timer,
+    ) async {
+      if (_disposed) {
+        timer.cancel();
+        _pollers.remove(checkoutRequestId);
+        return;
+      }
+
+      if (!_activePolls.add(checkoutRequestId)) {
+        return;
+      }
+
+      try {
+        final idx = _payments.indexWhere((p) => p.id == paymentId);
+
+        if (idx == -1) {
           timer.cancel();
           _pollers.remove(checkoutRequestId);
           return;
         }
 
-        if (!_activePolls.add(checkoutRequestId)) {
+        final payment = _payments[idx];
+
+        if (payment.status != PaymentStatus.pending) {
+          timer.cancel();
+          _pollers.remove(checkoutRequestId);
           return;
         }
 
-        try {
-          final idx = _payments.indexWhere(
-                (p) => p.id == paymentId,
-          );
+        final result = await _mpesa.pollStatus(checkoutRequestId);
 
-          if (idx == -1) {
-            timer.cancel();
-            _pollers.remove(checkoutRequestId);
-            return;
-          }
-
-          final payment = _payments[idx];
-
-          if (payment.status != PaymentStatus.pending) {
-            timer.cancel();
-            _pollers.remove(checkoutRequestId);
-            return;
-          }
-
-          final result = await _mpesa.pollStatus(
-            checkoutRequestId,
-          );
-
-          if (_disposed) {
-            timer.cancel();
-            return;
-          }
-
-          if (result.isSuccess) {
-            await _applyReconciledSuccess(payment, result);
-
-            timer.cancel();
-            _pollers.remove(checkoutRequestId);
-          } else if (result.isFailed) {
-            await _applyReconciledFailure(payment, result);
-
-            timer.cancel();
-            _pollers.remove(checkoutRequestId);
-          } else if (
-          DateTime.now().difference(startedAt) >= maxWait
-          ) {
-            // A timeout is not proof of payment failure.
-            // Keep the payment pending for later reconciliation.
-            timer.cancel();
-            _pollers.remove(checkoutRequestId);
-            _notify();
-          }
-        } catch (e, stackTrace) {
-          debugPrint('M-Pesa polling error: $e');
-          debugPrintStack(stackTrace: stackTrace);
-        } finally {
-          _activePolls.remove(checkoutRequestId);
+        if (_disposed) {
+          timer.cancel();
+          return;
         }
-      },
-    );
+
+        if (result.isSuccess) {
+          await _applyReconciledSuccess(payment, result);
+
+          timer.cancel();
+          _pollers.remove(checkoutRequestId);
+        } else if (result.isFailed) {
+          await _applyReconciledFailure(payment, result);
+
+          timer.cancel();
+          _pollers.remove(checkoutRequestId);
+        } else if (DateTime.now().difference(startedAt) >= maxWait) {
+          // A timeout is not proof of payment failure.
+          // Keep the payment pending for later reconciliation.
+          timer.cancel();
+          _pollers.remove(checkoutRequestId);
+          _notify();
+        }
+      } catch (e, stackTrace) {
+        debugPrint('M-Pesa polling error: $e');
+        debugPrintStack(stackTrace: stackTrace);
+      } finally {
+        _activePolls.remove(checkoutRequestId);
+      }
+    });
   }
 
   // ─── Manual Payment Refresh ─────────────────────────────
 
-  Future<void> refreshPendingPayment(
-      String paymentId,
-      ) async {
+  Future<void> refreshPendingPayment(String paymentId) async {
     if (_disposed) return;
 
-    final idx = _payments.indexWhere(
-          (p) => p.id == paymentId,
-    );
+    final idx = _payments.indexWhere((p) => p.id == paymentId);
 
     if (idx == -1) return;
 
@@ -760,32 +711,27 @@ class AppState extends ChangeNotifier {
     return _payments
         .where(
           (p) =>
-      p.status == PaymentStatus.confirmed &&
-          p.paymentDate.year == now.year &&
-          p.paymentDate.month == now.month,
-    )
+              p.status == PaymentStatus.confirmed &&
+              p.paymentDate.year == now.year &&
+              p.paymentDate.month == now.month,
+        )
         .fold(0, (sum, p) => sum + p.amount);
   }
 
   int get occupiedCount {
-    return _units
-        .where((u) => u.status == UnitStatus.occupied)
-        .length;
+    return _units.where((u) => u.status == UnitStatus.occupied).length;
   }
 
   int get vacantCount {
-    return _units
-        .where((u) => u.status == UnitStatus.vacant)
-        .length;
+    return _units.where((u) => u.status == UnitStatus.vacant).length;
   }
 
   int get pendingReconciliationCount {
     return _payments
         .where(
           (p) =>
-      p.status == PaymentStatus.pending &&
-          p.checkoutRequestId != null,
-    )
+              p.status == PaymentStatus.pending && p.checkoutRequestId != null,
+        )
         .length;
   }
 
@@ -795,9 +741,7 @@ class AppState extends ChangeNotifier {
     return _db.exportAll();
   }
 
-  Future<void> restoreBackup(
-      Map<String, dynamic> data,
-      ) async {
+  Future<void> restoreBackup(Map<String, dynamic> data) async {
     if (_disposed) return;
 
     // Stop polling before replacing local payment records.

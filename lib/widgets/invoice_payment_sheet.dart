@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+
 import '../providers/app_state.dart';
 import '../models/payment.dart';
 
@@ -41,7 +42,7 @@ class _InvoicePaymentSheetState extends State<InvoicePaymentSheet> {
     final state = context.watch<AppState>();
     // Re-read from state so polling updates rebuild this sheet.
     final live = state.payments.firstWhere(
-          (p) => p.id == _current.id,
+      (p) => p.id == _current.id,
       orElse: () => _current,
     );
     _current = live;
@@ -63,9 +64,10 @@ class _InvoicePaymentSheetState extends State<InvoicePaymentSheet> {
         children: [
           Row(
             children: [
-              const Text('Rent Invoice',
-                  style:
-                  TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+              const Text(
+                'Rent Invoice',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              ),
               const Spacer(),
               _statusChip(_current.status),
             ],
@@ -79,8 +81,10 @@ class _InvoicePaymentSheetState extends State<InvoicePaymentSheet> {
                 children: [
                   _kv('Tenant', tenant?.fullName ?? '—'),
                   _kv('Phone', tenant?.phoneNumber ?? '—'),
-                  _kv('Period',
-                      DateFormat('MMMM yyyy').format(_current.forMonth)),
+                  _kv(
+                    'Period',
+                    DateFormat('MMMM yyyy').format(_current.forMonth),
+                  ),
                   _kv('Amount', currency.format(_current.amount)),
                   if (_current.mpesaReceipt != null)
                     _kv('Receipt', _current.mpesaReceipt!),
@@ -110,10 +114,10 @@ class _InvoicePaymentSheetState extends State<InvoicePaymentSheet> {
                 onPressed: _sending ? null : _send,
                 icon: _sending
                     ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
                     : const Icon(Icons.send),
                 label: Text(_sending ? 'Sending…' : 'Send STK Push'),
               ),
@@ -133,8 +137,10 @@ class _InvoicePaymentSheetState extends State<InvoicePaymentSheet> {
             ],
             if (_error != null) ...[
               const SizedBox(height: 8),
-              Text(_error!,
-                  style: TextStyle(color: Colors.red.shade700, fontSize: 12)),
+              Text(
+                _error!,
+                style: TextStyle(color: Colors.red.shade700, fontSize: 12),
+              ),
             ],
           ] else if (_current.status == PaymentStatus.confirmed) ...[
             const Icon(Icons.check_circle, color: Colors.green, size: 48),
@@ -154,16 +160,17 @@ class _InvoicePaymentSheetState extends State<InvoicePaymentSheet> {
   Future<void> _send() async {
     final phone = _phoneCtrl.text.trim().isEmpty
         ? (context.read<AppState>().getTenant(_current.tenantId)?.phoneNumber ??
-        '')
+              '')
         : _phoneCtrl.text.trim();
     setState(() {
       _sending = true;
       _error = null;
     });
     try {
-      await context
-          .read<AppState>()
-          .requestMpesaPayment(paymentId: _current.id, phone: phone);
+      await context.read<AppState>().requestMpesaPayment(
+        paymentId: _current.id,
+        phone: phone,
+      );
     } catch (e) {
       if (mounted) setState(() => _error = e.toString());
     } finally {
@@ -178,8 +185,14 @@ class _InvoicePaymentSheetState extends State<InvoicePaymentSheet> {
       PaymentStatus.rejected => ('FAILED', Colors.red),
     };
     return Chip(
-      label: Text(label,
-          style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.w700)),
+      label: Text(
+        label,
+        style: TextStyle(
+          fontSize: 11,
+          color: color,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
       backgroundColor: color.withOpacity(0.1),
       side: BorderSide.none,
     );
@@ -192,9 +205,12 @@ class _InvoicePaymentSheetState extends State<InvoicePaymentSheet> {
       children: [
         Text(k, style: TextStyle(color: Colors.grey.shade600)),
         Flexible(
-            child: Text(v,
-                style: const TextStyle(fontWeight: FontWeight.w600),
-                textAlign: TextAlign.right)),
+          child: Text(
+            v,
+            style: const TextStyle(fontWeight: FontWeight.w600),
+            textAlign: TextAlign.right,
+          ),
+        ),
       ],
     ),
   );

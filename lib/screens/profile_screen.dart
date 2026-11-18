@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -101,81 +100,80 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     _pinField(confirmController, 'Confirm new PIN'),
                     if (error != null) ...[
                       const SizedBox(height: 12),
-                      Text(
-                        error!,
-                        style: const TextStyle(color: Colors.red),
-                      ),
+                      Text(error!, style: const TextStyle(color: Colors.red)),
                     ],
                   ],
                 ),
               ),
               actions: [
                 TextButton(
-                  onPressed: saving
-                      ? null
-                      : () => Navigator.pop(dialogContext),
+                  onPressed: saving ? null : () => Navigator.pop(dialogContext),
                   child: const Text('Cancel'),
                 ),
                 FilledButton(
                   onPressed: saving
                       ? null
                       : () async {
-                    final current = currentController.text.trim();
-                    final next = newController.text.trim();
-                    final confirm = confirmController.text.trim();
+                          final current = currentController.text.trim();
+                          final next = newController.text.trim();
+                          final confirm = confirmController.text.trim();
 
-                    if (!RegExp(r'^\d{4,6}$').hasMatch(next)) {
-                      setDialogState(() =>
-                      error = 'New PIN must contain 4 to 6 digits.');
-                      return;
-                    }
+                          if (!RegExp(r'^\d{4,6}$').hasMatch(next)) {
+                            setDialogState(
+                              () =>
+                                  error = 'New PIN must contain 4 to 6 digits.',
+                            );
+                            return;
+                          }
 
-                    if (next != confirm) {
-                      setDialogState(() =>
-                      error = 'The new PINs do not match.');
-                      return;
-                    }
+                          if (next != confirm) {
+                            setDialogState(
+                              () => error = 'The new PINs do not match.',
+                            );
+                            return;
+                          }
 
-                    if (current == next) {
-                      setDialogState(() =>
-                      error = 'Choose a different PIN.');
-                      return;
-                    }
+                          if (current == next) {
+                            setDialogState(
+                              () => error = 'Choose a different PIN.',
+                            );
+                            return;
+                          }
 
-                    setDialogState(() {
-                      saving = true;
-                      error = null;
-                    });
+                          setDialogState(() {
+                            saving = true;
+                            error = null;
+                          });
 
-                    try {
-                      await _auth.changePin(
-                        currentPin: current,
-                        newPin: next,
-                      );
+                          try {
+                            await _auth.changePin(
+                              currentPin: current,
+                              newPin: next,
+                            );
 
-                      if (dialogContext.mounted) {
-                        Navigator.pop(dialogContext);
-                      }
+                            if (dialogContext.mounted) {
+                              Navigator.pop(dialogContext);
+                            }
 
-                      if (mounted) {
-                        _message('PIN changed successfully.');
-                      }
-                    } catch (e) {
-                      setDialogState(() {
-                        saving = false;
-                        error = e.toString().replaceFirst(
-                          'Exception: ',
-                          '',
-                        );
-                      });
-                    }
-                  },
+                            if (mounted) {
+                              _message('PIN changed successfully.');
+                            }
+                          } catch (e) {
+                            setDialogState(() {
+                              saving = false;
+                              error = e.toString().replaceFirst(
+                                'Exception: ',
+                                '',
+                              );
+                            });
+                          }
+                        },
                   child: saving
                       ? const SizedBox(
-                    height: 18,
-                    width: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
+                          height: 18,
+                          width: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
                       : const Text('Update PIN'),
                 ),
               ],
@@ -199,21 +197,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
       decoration: InputDecoration(
         labelText: label,
         counterText: '',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
 
   Widget _field(
-      String label,
-      TextEditingController controller, {
-        required IconData icon,
-        TextInputType keyboardType = TextInputType.text,
-        String? Function(String?)? validator,
-        int maxLines = 1,
-      }) {
+    String label,
+    TextEditingController controller, {
+    required IconData icon,
+    TextInputType keyboardType = TextInputType.text,
+    String? Function(String?)? validator,
+    int maxLines = 1,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
@@ -271,147 +267,144 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(20),
-          children: [
-            Center(
-              child: Container(
-                width: 88,
-                height: 88,
-                decoration: const BoxDecoration(
-                  color: _green,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.person_rounded,
-                  color: Colors.white,
-                  size: 46,
-                ),
-              ),
-            ),
-            const SizedBox(height: 14),
-            Center(
-              child: Text(
-                _nameController.text.isEmpty
-                    ? 'Your account'
-                    : _nameController.text,
-                style: GoogleFonts.inter(
-                  fontSize: 19,
-                  fontWeight: FontWeight.bold,
-                  color: _green,
-                ),
-              ),
-            ),
-            const SizedBox(height: 28),
-            Text(
-              'PERSONAL DETAILS',
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1,
-                color: Colors.grey.shade600,
-              ),
-            ),
-            const SizedBox(height: 14),
-            Form(
-              key: _formKey,
-              child: Column(
+              child: ListView(
+                padding: const EdgeInsets.all(20),
                 children: [
-                  _field(
-                    'Full name',
-                    _nameController,
-                    icon: Icons.person_outline,
-                    validator: (v) => v == null || v.trim().isEmpty
-                        ? 'Enter your full name'
-                        : null,
+                  Center(
+                    child: Container(
+                      width: 88,
+                      height: 88,
+                      decoration: const BoxDecoration(
+                        color: _green,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.person_rounded,
+                        color: Colors.white,
+                        size: 46,
+                      ),
+                    ),
                   ),
-                  _field(
-                    'Email address',
-                    _emailController,
-                    icon: Icons.email_outlined,
-                    keyboardType: TextInputType.emailAddress,
-                    validator: (v) {
-                      if (v == null || v.trim().isEmpty) return null;
-                      if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
-                          .hasMatch(v.trim())) {
-                        return 'Enter a valid email address';
-                      }
-                      return null;
-                    },
+                  const SizedBox(height: 14),
+                  Center(
+                    child: Text(
+                      _nameController.text.isEmpty
+                          ? 'Your account'
+                          : _nameController.text,
+                      style: GoogleFonts.inter(
+                        fontSize: 19,
+                        fontWeight: FontWeight.bold,
+                        color: _green,
+                      ),
+                    ),
                   ),
-                  _field(
-                    'Phone number',
-                    _phoneController,
-                    icon: Icons.phone_outlined,
-                    keyboardType: TextInputType.phone,
+                  const SizedBox(height: 28),
+                  Text(
+                    'PERSONAL DETAILS',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
+                      color: Colors.grey.shade600,
+                    ),
                   ),
-                  _field(
-                    'Business / property management name',
-                    _businessController,
-                    icon: Icons.business_outlined,
+                  const SizedBox(height: 14),
+                  Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        _field(
+                          'Full name',
+                          _nameController,
+                          icon: Icons.person_outline,
+                          validator: (v) => v == null || v.trim().isEmpty
+                              ? 'Enter your full name'
+                              : null,
+                        ),
+                        _field(
+                          'Email address',
+                          _emailController,
+                          icon: Icons.email_outlined,
+                          keyboardType: TextInputType.emailAddress,
+                          validator: (v) {
+                            if (v == null || v.trim().isEmpty) return null;
+                            if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
+                                .hasMatch(v.trim())) {
+                              return 'Enter a valid email address';
+                            }
+                            return null;
+                          },
+                        ),
+                        _field(
+                          'Phone number',
+                          _phoneController,
+                          icon: Icons.phone_outlined,
+                          keyboardType: TextInputType.phone,
+                        ),
+                        _field(
+                          'Business / property management name',
+                          _businessController,
+                          icon: Icons.business_outlined,
+                        ),
+                        _field(
+                          'Business address',
+                          _addressController,
+                          icon: Icons.location_on_outlined,
+                          maxLines: 2,
+                        ),
+                      ],
+                    ),
                   ),
-                  _field(
-                    'Business address',
-                    _addressController,
-                    icon: Icons.location_on_outlined,
-                    maxLines: 2,
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    height: 52,
+                    child: FilledButton.icon(
+                      onPressed: _saving ? null : _saveProfile,
+                      icon: _saving
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Icon(Icons.save_outlined),
+                      label: Text(_saving ? 'Saving...' : 'Save profile'),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: _green,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                    ),
                   ),
+                  const SizedBox(height: 32),
+                  Text(
+                    'SECURITY',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Card(
+                    child: ListTile(
+                      leading: const Icon(Icons.lock_outline, color: _green),
+                      title: const Text('Change PIN'),
+                      subtitle: const Text(
+                        'Update the PIN used to unlock Spectrum',
+                      ),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: _showChangePinDialog,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
-            const SizedBox(height: 8),
-            SizedBox(
-              height: 52,
-              child: FilledButton.icon(
-                onPressed: _saving ? null : _saveProfile,
-                icon: _saving
-                    ? const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2,
-                  ),
-                )
-                    : const Icon(Icons.save_outlined),
-                label: Text(_saving ? 'Saving...' : 'Save profile'),
-                style: FilledButton.styleFrom(
-                  backgroundColor: _green,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 32),
-            Text(
-              'SECURITY',
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1,
-                color: Colors.grey.shade600,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Card(
-              child: ListTile(
-                leading: const Icon(
-                  Icons.lock_outline,
-                  color: _green,
-                ),
-                title: const Text('Change PIN'),
-                subtitle: const Text(
-                  'Update the PIN used to unlock Spectrum',
-                ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: _showChangePinDialog,
-              ),
-            ),
-            const SizedBox(height: 24),
-          ],
-        ),
-      ),
     );
   }
 }

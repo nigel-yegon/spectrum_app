@@ -13,15 +13,10 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
 
-    final currency = NumberFormat.currency(
-      symbol: 'KSh ',
-      decimalDigits: 0,
-    );
+    final currency = NumberFormat.currency(symbol: 'KSh ', decimalDigits: 0);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-      ),
+      appBar: AppBar(title: const Text('Settings')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -35,10 +30,7 @@ class SettingsScreen extends StatelessWidget {
                 children: [
                   const Text(
                     'Summary',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 12),
                   _kv('Properties', '${state.properties.length}'),
@@ -61,13 +53,9 @@ class SettingsScreen extends StatelessWidget {
           const SizedBox(height: 16),
 
           // ─── Backup and Restore ────────────────────────
-
           const Text(
             'Backup & Restore',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),
 
           const SizedBox(height: 8),
@@ -98,9 +86,7 @@ class SettingsScreen extends StatelessWidget {
                 ListTile(
                   leading: const Icon(Icons.share_outlined),
                   title: const Text('Export Local Backup File'),
-                  subtitle: const Text(
-                    'Save a JSON copy to your device',
-                  ),
+                  subtitle: const Text('Save a JSON copy to your device'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => _exportLocalFile(context, state),
                 ),
@@ -118,14 +104,10 @@ class SettingsScreen extends StatelessWidget {
           const SizedBox(height: 24),
 
           // ─── Version ──────────────────────────────────
-
           Center(
             child: Text(
               'Spectrum v1.0.0',
-              style: TextStyle(
-                color: Colors.grey.shade500,
-                fontSize: 12,
-              ),
+              style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
             ),
           ),
         ],
@@ -142,20 +124,13 @@ class SettingsScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Flexible(
-            child: Text(
-              label,
-              style: TextStyle(
-                color: Colors.grey.shade700,
-              ),
-            ),
+            child: Text(label, style: TextStyle(color: Colors.grey.shade700)),
           ),
           const SizedBox(width: 12),
           Text(
             value,
             textAlign: TextAlign.end,
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.w600),
           ),
         ],
       ),
@@ -184,10 +159,7 @@ class SettingsScreen extends StatelessWidget {
 
   // ─── Upload Backup to VPS ──────────────────────────────
 
-  Future<void> _uploadToVps(
-    BuildContext context,
-    AppState state,
-  ) async {
+  Future<void> _uploadToVps(BuildContext context, AppState state) async {
     try {
       _showMessage(context, 'Preparing backup...');
 
@@ -202,9 +174,7 @@ class SettingsScreen extends StatelessWidget {
 
       if (!context.mounted) return;
 
-      final formattedDate = DateFormat(
-        'MMM d, yyyy HH:mm',
-      ).format(storedAt);
+      final formattedDate = DateFormat('MMM d, yyyy HH:mm').format(storedAt);
 
       _showMessage(
         context,
@@ -214,20 +184,13 @@ class SettingsScreen extends StatelessWidget {
       debugPrint('VPS backup upload failed: $e');
       debugPrintStack(stackTrace: stackTrace);
 
-      _showMessage(
-        context,
-        'Upload failed: $e',
-        isError: true,
-      );
+      _showMessage(context, 'Upload failed: $e', isError: true);
     }
   }
 
   // ─── Download and Restore from VPS ─────────────────────
 
-  Future<void> _downloadFromVps(
-    BuildContext context,
-    AppState state,
-  ) async {
+  Future<void> _downloadFromVps(BuildContext context, AppState state) async {
     try {
       _showMessage(context, 'Downloading latest backup...');
 
@@ -274,28 +237,18 @@ class SettingsScreen extends StatelessWidget {
 
       if (!context.mounted) return;
 
-      _showMessage(
-        context,
-        'Backup restored successfully.',
-      );
+      _showMessage(context, 'Backup restored successfully.');
     } catch (e, stackTrace) {
       debugPrint('VPS backup restore failed: $e');
       debugPrintStack(stackTrace: stackTrace);
 
-      _showMessage(
-        context,
-        'Restore failed: $e',
-        isError: true,
-      );
+      _showMessage(context, 'Restore failed: $e', isError: true);
     }
   }
 
   // ─── Export Local Backup ───────────────────────────────
 
-  Future<void> _exportLocalFile(
-    BuildContext context,
-    AppState state,
-  ) async {
+  Future<void> _exportLocalFile(BuildContext context, AppState state) async {
     try {
       _showMessage(context, 'Creating local backup...');
 
@@ -308,28 +261,19 @@ class SettingsScreen extends StatelessWidget {
       if (!context.mounted) return;
 
       await Share.shareXFiles(
-        [
-          XFile(file.path),
-        ],
+        [XFile(file.path)],
         text: 'Spectrum property management backup',
         subject: 'Spectrum Backup',
       );
 
       if (!context.mounted) return;
 
-      _showMessage(
-        context,
-        'Backup file is ready to share or save.',
-      );
+      _showMessage(context, 'Backup file is ready to share or save.');
     } catch (e, stackTrace) {
       debugPrint('Local backup export failed: $e');
       debugPrintStack(stackTrace: stackTrace);
 
-      _showMessage(
-        context,
-        'Export failed: $e',
-        isError: true,
-      );
+      _showMessage(context, 'Export failed: $e', isError: true);
     }
   }
 }

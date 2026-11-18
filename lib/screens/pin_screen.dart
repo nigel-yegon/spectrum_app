@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -76,9 +75,7 @@ class _PinScreenState extends State<PinScreen> {
       if (!mounted) return;
 
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (_) => const DashboardScreen(),
-        ),
+        MaterialPageRoute(builder: (_) => const DashboardScreen()),
       );
     } catch (e) {
       if (mounted) {
@@ -109,118 +106,120 @@ class _PinScreenState extends State<PinScreen> {
               child: _loading
                   ? const CircularProgressIndicator()
                   : Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(22),
-                    decoration: BoxDecoration(
-                      color: _green,
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    child: const Icon(
-                      Icons.apartment_rounded,
-                      color: Colors.white,
-                      size: 44,
-                    ),
-                  ),
-                  const SizedBox(height: 28),
-                  Text(
-                    _firstSetup ? 'Secure your Spectrum account' : 'Welcome back',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.inter(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: _green,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    _firstSetup
-                        ? 'Create a PIN to protect your property management data.'
-                        : 'Enter your PIN to continue.',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.inter(
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  TextField(
-                    controller: _pinController,
-                    obscureText: true,
-                    keyboardType: TextInputType.number,
-                    maxLength: 6,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      letterSpacing: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    decoration: InputDecoration(
-                      counterText: '',
-                      hintText: '••••',
-                      labelText: _firstSetup ? 'Create PIN' : 'Enter PIN',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                    onSubmitted: (_) {
-                      if (!_firstSetup) _submit();
-                    },
-                  ),
-                  if (_firstSetup) ...[
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _confirmController,
-                      obscureText: true,
-                      keyboardType: TextInputType.number,
-                      maxLength: 6,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 24,
-                        letterSpacing: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      decoration: InputDecoration(
-                        counterText: '',
-                        hintText: '••••',
-                        labelText: 'Confirm PIN',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(22),
+                          decoration: BoxDecoration(
+                            color: _green,
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          child: const Icon(
+                            Icons.apartment_rounded,
+                            color: Colors.white,
+                            size: 44,
+                          ),
                         ),
-                      ),
-                    ),
-                  ],
-                  if (_error != null) ...[
-                    const SizedBox(height: 14),
-                    Text(
-                      _error!,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                  ],
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 54,
-                    child: FilledButton(
-                      onPressed: _submitting ? null : _submit,
-                      style: FilledButton.styleFrom(
-                        backgroundColor: _green,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                        const SizedBox(height: 28),
+                        Text(
+                          _firstSetup
+                              ? 'Secure your Spectrum account'
+                              : 'Welcome back',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.inter(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: _green,
+                          ),
                         ),
-                      ),
-                      child: _submitting
-                          ? const CircularProgressIndicator(
-                        color: Colors.white,
-                      )
-                          : Text(
-                        _firstSetup ? 'Create PIN' : 'Unlock Spectrum',
-                      ),
+                        const SizedBox(height: 10),
+                        Text(
+                          _firstSetup
+                              ? 'Create a PIN to protect your property management data.'
+                              : 'Enter your PIN to continue.',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.inter(color: Colors.grey.shade600),
+                        ),
+                        const SizedBox(height: 32),
+                        TextField(
+                          controller: _pinController,
+                          obscureText: true,
+                          keyboardType: TextInputType.number,
+                          maxLength: 6,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 24,
+                            letterSpacing: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          decoration: InputDecoration(
+                            counterText: '',
+                            hintText: '••••',
+                            labelText: _firstSetup ? 'Create PIN' : 'Enter PIN',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          onSubmitted: (_) {
+                            if (!_firstSetup) _submit();
+                          },
+                        ),
+                        if (_firstSetup) ...[
+                          const SizedBox(height: 16),
+                          TextField(
+                            controller: _confirmController,
+                            obscureText: true,
+                            keyboardType: TextInputType.number,
+                            maxLength: 6,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 24,
+                              letterSpacing: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            decoration: InputDecoration(
+                              counterText: '',
+                              hintText: '••••',
+                              labelText: 'Confirm PIN',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                          ),
+                        ],
+                        if (_error != null) ...[
+                          const SizedBox(height: 14),
+                          Text(
+                            _error!,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                        ],
+                        const SizedBox(height: 24),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 54,
+                          child: FilledButton(
+                            onPressed: _submitting ? null : _submit,
+                            style: FilledButton.styleFrom(
+                              backgroundColor: _green,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            child: _submitting
+                                ? const CircularProgressIndicator(
+                                    color: Colors.white,
+                                  )
+                                : Text(
+                                    _firstSetup
+                                        ? 'Create PIN'
+                                        : 'Unlock Spectrum',
+                                  ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
             ),
           ),
         ),

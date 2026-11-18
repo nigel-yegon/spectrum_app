@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -38,10 +37,7 @@ class _SplashScreenState extends State<SplashScreen> {
         PageRouteBuilder(
           pageBuilder: (_, __, ___) => const PinScreen(),
           transitionsBuilder: (_, animation, __, child) {
-            return FadeTransition(
-              opacity: animation,
-              child: child,
-            );
+            return FadeTransition(opacity: animation, child: child);
           },
           transitionDuration: const Duration(milliseconds: 800),
         ),

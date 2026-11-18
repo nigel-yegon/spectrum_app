@@ -76,13 +76,15 @@ class Payment {
     paymentDate: DateTime.parse(map['paymentDate']),
     forMonth: DateTime.parse(map['forMonth']),
     method: PaymentMethod.values.firstWhere(
-            (e) => e.name == map['method'],
-        orElse: () => PaymentMethod.cash),
+      (e) => e.name == map['method'],
+      orElse: () => PaymentMethod.cash,
+    ),
     reference: map['reference'],
     notes: map['notes'],
     status: PaymentStatus.values.firstWhere(
-            (e) => e.name == map['status'],
-        orElse: () => PaymentStatus.confirmed),
+      (e) => e.name == map['status'],
+      orElse: () => PaymentStatus.confirmed,
+    ),
     createdAt: DateTime.parse(map['createdAt']),
     checkoutRequestId: map['checkoutRequestId'],
     merchantRequestId: map['merchantRequestId'],
@@ -106,29 +108,29 @@ class Payment {
     DateTime? paymentDate,
     int? serverInvoiceId,
     String? serverInvoiceNumber,
-  }) =>
-      Payment(
-        id: id,
-        unitId: unitId,
-        tenantId: tenantId,
-        amount: amount,
-        paymentDate: paymentDate ?? this.paymentDate,
-        forMonth: forMonth,
-        method: method,
-        reference: reference ?? this.reference,
-        notes: notes,
-        status: status ?? this.status,
-        createdAt: createdAt,
-        checkoutRequestId: checkoutRequestId ?? this.checkoutRequestId,
-        merchantRequestId: merchantRequestId ?? this.merchantRequestId,
-        resultCode: resultCode ?? this.resultCode,
-        failureReason: failureReason ?? this.failureReason,
-        mpesaReceipt: mpesaReceipt ?? this.mpesaReceipt,
-        paidAt: paidAt ?? this.paidAt,
-        serverInvoiceId: serverInvoiceId ?? this.serverInvoiceId,
-        serverInvoiceNumber: serverInvoiceNumber ?? this.serverInvoiceNumber,
-      );
+  }) => Payment(
+    id: id,
+    unitId: unitId,
+    tenantId: tenantId,
+    amount: amount,
+    paymentDate: paymentDate ?? this.paymentDate,
+    forMonth: forMonth,
+    method: method,
+    reference: reference ?? this.reference,
+    notes: notes,
+    status: status ?? this.status,
+    createdAt: createdAt,
+    checkoutRequestId: checkoutRequestId ?? this.checkoutRequestId,
+    merchantRequestId: merchantRequestId ?? this.merchantRequestId,
+    resultCode: resultCode ?? this.resultCode,
+    failureReason: failureReason ?? this.failureReason,
+    mpesaReceipt: mpesaReceipt ?? this.mpesaReceipt,
+    paidAt: paidAt ?? this.paidAt,
+    serverInvoiceId: serverInvoiceId ?? this.serverInvoiceId,
+    serverInvoiceNumber: serverInvoiceNumber ?? this.serverInvoiceNumber,
+  );
 }
 
 enum PaymentMethod { cash, mpesa, bank, cheque }
+
 enum PaymentStatus { pending, confirmed, rejected }

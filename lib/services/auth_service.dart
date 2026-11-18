@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 import 'dart:math';
 
@@ -21,13 +20,11 @@ class AuthService {
     bits: 256,
   );
 
-  Future<SharedPreferences> get _prefs =>
-      SharedPreferences.getInstance();
+  Future<SharedPreferences> get _prefs => SharedPreferences.getInstance();
 
   Future<bool> get hasPin async {
     final prefs = await _prefs;
-    return prefs.containsKey(_saltKey) &&
-        prefs.containsKey(_hashKey);
+    return prefs.containsKey(_saltKey) && prefs.containsKey(_hashKey);
   }
 
   Future<bool> get isLocked async {
@@ -39,14 +36,12 @@ class AuthService {
   Future<Duration> get remainingLockDuration async {
     final prefs = await _prefs;
     final lockUntil = prefs.getInt(_lockUntilKey) ?? 0;
-    final remaining =
-        lockUntil - DateTime.now().millisecondsSinceEpoch;
+    final remaining = lockUntil - DateTime.now().millisecondsSinceEpoch;
 
     return Duration(milliseconds: remaining > 0 ? remaining : 0);
   }
 
-  bool _validPin(String pin) =>
-      RegExp(r'^\d{4,6}$').hasMatch(pin);
+  bool _validPin(String pin) => RegExp(r'^\d{4,6}$').hasMatch(pin);
 
   Future<String> _deriveHash(String pin, List<int> salt) async {
     final key = await _algorithm.deriveKey(

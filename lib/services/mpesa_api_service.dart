@@ -1,6 +1,8 @@
 // lib/services/mpesa_api_service.dart
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
+
 import '../config.dart';
 
 class StkPushResult {
@@ -39,8 +41,8 @@ class MpesaApiService {
   final String _baseUrl;
 
   MpesaApiService({http.Client? client, String? baseUrl})
-      : _client = client ?? http.Client(),
-        _baseUrl = baseUrl ?? AppConfig.baseUrl;
+    : _client = client ?? http.Client(),
+      _baseUrl = baseUrl ?? AppConfig.baseUrl;
 
   Future<StkPushResult> requestRent({
     required String phone, // 2547XXXXXXXX
@@ -49,21 +51,20 @@ class MpesaApiService {
     required String unitNumber,
     required DateTime forMonth,
   }) async {
-    final ym =
-        '${forMonth.year}-${forMonth.month.toString().padLeft(2, '0')}';
+    final ym = '${forMonth.year}-${forMonth.month.toString().padLeft(2, '0')}';
 
     final res = await _client
         .post(
-      Uri.parse('$_baseUrl${AppConfig.mpesaRentPath}'),
-      headers: {'content-type': 'application/json'},
-      body: jsonEncode({
-        'phone': phone,
-        'amount': amount,
-        'tenantName': tenantName,
-        'unitNumber': unitNumber,
-        'forMonth': ym,
-      }),
-    )
+          Uri.parse('$_baseUrl${AppConfig.mpesaRentPath}'),
+          headers: {'content-type': 'application/json'},
+          body: jsonEncode({
+            'phone': phone,
+            'amount': amount,
+            'tenantName': tenantName,
+            'unitNumber': unitNumber,
+            'forMonth': ym,
+          }),
+        )
         .timeout(const Duration(seconds: 50));
 
     final body = jsonDecode(res.body) as Map<String, dynamic>;
@@ -81,8 +82,11 @@ class MpesaApiService {
   Future<RemotePaymentStatus> pollStatus(String checkoutRequestId) async {
     try {
       final res = await _client
-          .get(Uri.parse(
-          '$_baseUrl${AppConfig.mpesaStatusPath}/$checkoutRequestId'))
+          .get(
+            Uri.parse(
+              '$_baseUrl${AppConfig.mpesaStatusPath}/$checkoutRequestId',
+            ),
+          )
           .timeout(const Duration(seconds: 10));
       if (res.statusCode == 404) {
         return RemotePaymentStatus(status: 'PENDING');

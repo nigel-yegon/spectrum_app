@@ -1,6 +1,7 @@
 // lib/widgets/assign_tenant_sheet.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../providers/app_state.dart';
 
 class AssignTenantSheet extends StatelessWidget {
@@ -19,16 +20,17 @@ class AssignTenantSheet extends StatelessWidget {
           children: [
             const Padding(
               padding: EdgeInsets.only(bottom: 8),
-              child: Text('Assign Tenant',
-                  style:
-                  TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+              child: Text(
+                'Assign Tenant',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              ),
             ),
             if (state.tenants.isEmpty)
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 24),
                 child: Center(
-                    child: Text(
-                        'No tenants yet. Add one in the Tenants tab.')),
+                  child: Text('No tenants yet. Add one in the Tenants tab.'),
+                ),
               )
             else
               ...state.tenants.map((t) {

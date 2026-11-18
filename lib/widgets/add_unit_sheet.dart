@@ -1,6 +1,7 @@
 // lib/widgets/add_unit_sheet.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../providers/app_state.dart';
 
 class AddUnitSheet extends StatefulWidget {
@@ -42,8 +43,10 @@ class _AddUnitSheetState extends State<AddUnitSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text('Add Unit',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+              const Text(
+                'Add Unit',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _numberCtrl,
@@ -51,8 +54,7 @@ class _AddUnitSheetState extends State<AddUnitSheet> {
                   labelText: 'Unit Number',
                   border: OutlineInputBorder(),
                 ),
-                validator: (v) =>
-                (v == null || v.isEmpty) ? 'Required' : null,
+                validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
               ),
               const SizedBox(height: 12),
               TextFormField(
@@ -77,8 +79,9 @@ class _AddUnitSheetState extends State<AddUnitSheet> {
                   border: OutlineInputBorder(),
                 ),
                 items: List.generate(28, (i) => i + 1)
-                    .map((d) =>
-                    DropdownMenuItem(value: d, child: Text('Day $d')))
+                    .map(
+                      (d) => DropdownMenuItem(value: d, child: Text('Day $d')),
+                    )
                     .toList(),
                 onChanged: (v) => setState(() => _dueDay = v!),
               ),
