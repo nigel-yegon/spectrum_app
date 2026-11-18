@@ -82,6 +82,7 @@ class _HomeTab extends StatefulWidget {
 
 class _HomeTabState extends State<_HomeTab> {
   bool _showRecentPayments = true;
+  bool _showCurrencyAmounts = true;
 
   @override
   Widget build(BuildContext context) {
@@ -182,8 +183,29 @@ class _HomeTabState extends State<_HomeTab> {
                                   ),
                                 ),
                                 const SizedBox(width: 6),
-                                const Icon(Icons.visibility_off_outlined,
-                                    color: Colors.white70, size: 16),
+                                IconButton(
+                                  tooltip: _showCurrencyAmounts
+                                      ? 'Hide amounts'
+                                      : 'Show amounts',
+                                  onPressed: () {
+                                    setState(() {
+                                      _showCurrencyAmounts =
+                                      !_showCurrencyAmounts;
+                                    });
+                                  },
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(
+                                    minWidth: 32,
+                                    minHeight: 32,
+                                  ),
+                                  icon: Icon(
+                                    _showCurrencyAmounts
+                                        ? Icons.visibility_outlined
+                                        : Icons.visibility_off_outlined,
+                                    color: Colors.white70,
+                                    size: 18,
+                                  ),
+                                ),
                               ],
                             ),
                             const Icon(Icons.bar_chart_rounded,
@@ -192,7 +214,7 @@ class _HomeTabState extends State<_HomeTab> {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          currency.format(state.totalMonthlyExpectedRent),
+                          _formatCurrency(state.totalMonthlyExpectedRent, currency),
                           style: GoogleFonts.inter(
                             color: Colors.white,
                             fontSize: 32,
@@ -216,7 +238,7 @@ class _HomeTabState extends State<_HomeTab> {
                                       color: Color(0xFFA9D9B6), size: 14),
                                   const SizedBox(width: 4),
                                   Text(
-                                    currency.format(state.totalCollectedThisMonth),
+                                    _formatCurrency(state.totalCollectedThisMonth, currency),
                                     style: GoogleFonts.inter(
                                       color: const Color(0xFFA9D9B6),
                                       fontSize: 12,
@@ -528,7 +550,7 @@ class _HomeTabState extends State<_HomeTab> {
                                 ),
                               ),
                               Text(
-                                currency.format(p.amount),
+                                _formatCurrency(p.amount, currency),
                                 style: GoogleFonts.inter(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 13,
@@ -549,6 +571,10 @@ class _HomeTabState extends State<_HomeTab> {
         ),
       ),
     );
+  }
+
+  String _formatCurrency(num amount, NumberFormat formatter) {
+    return _showCurrencyAmounts ? formatter.format(amount) : '••••••';
   }
 
   String _getGreeting() {
