@@ -2,7 +2,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'dashboard_screen.dart';
+import 'package:spectrum/screens/pin_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -20,7 +20,7 @@ class _SplashScreenState extends State<SplashScreen> {
       if (mounted) {
         Navigator.of(context).pushReplacement(
           PageRouteBuilder(
-            pageBuilder: (_, __, ___) => const DashboardScreen(),
+            pageBuilder: (_, __, ___) => const PinScreen(),
             transitionsBuilder: (_, animation, __, child) {
               // Smooth fade transition
               return FadeTransition(opacity: animation, child: child);

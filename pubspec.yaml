@@ -1,12 +1,15 @@
+
 name: spectrum
 description: Real estate property management app
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: '>=3.13.0 <4.0.0'
+  flutter: '>=3.47.0'
 
 dependencies:
   flutter:
     sdk: flutter
+
   provider: ^6.1.1
   sqflite: ^2.3.0
   sqflite_common_ffi: ^2.3.2
@@ -17,10 +20,12 @@ dependencies:
   google_fonts: ^6.1.0
   fl_chart: ^0.66.0
   shared_preferences: ^2.2.2
-  file_picker: ^8.1.6
+
+  file_picker: ^13.4.0
   path_provider: ^2.1.1
-  share_plus: ^7.2.1
+  share_plus: ^13.3.1
   http: ^1.1.2
+  cryptography: ^2.9.0
 
 dev_dependencies:
   flutter_test:
